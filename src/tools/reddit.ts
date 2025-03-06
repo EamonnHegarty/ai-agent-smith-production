@@ -1,6 +1,7 @@
 import type { ToolFn } from '../../types'
 import { z } from 'zod'
 import fetch from 'node-fetch'
+import https from 'https'
 
 export const redditToolDefinition = {
   name: 'reddit',
@@ -11,8 +12,15 @@ export const redditToolDefinition = {
 type Args = z.infer<typeof redditToolDefinition.parameters>
 
 export const reddit: ToolFn<Args, string> = async ({ toolArgs }) => {
+  const agent = new https.Agent({
+    rejectUnauthorized: false,
+  })
+
   const { data } = await fetch(
-    'https://www.reddit.com/r/EscapefromTarkov/.json'
+    'https://www.reddit.com/r/EscapefromTarkov/.json',
+    {
+      agent,
+    }
   ).then((res) => res.json())
   const relevantInfo = data.children.map((child: any) => ({
     title: child.data.title,
